@@ -53,7 +53,7 @@ client.once(Events.GuildMemberAdd, async (member) => {
   
   // membersMap.set(member.user.tag, member);
   const channel = await member.createDM();
-  channel.send('Welcome to the server! Click the following link to verify your membership: http://localhost:1234/');
+  channel.send('Welcome to the server! Click the following link to verify your membership: http://localhost:1234?serverId='+member.guild.id+'&discordId='+member.user.tag);
 });
 
 app.post('/:id/verify', async (req, res) => {
