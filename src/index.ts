@@ -44,7 +44,7 @@ client.once(Events.GuildMemberAdd, async (member) => {
 
   if(server){
     server.set(member.user.tag, member);
-    console.log(`New member: ${member.user.username}`);
+    console.log(`New member: ${member.user.tag}`);
   } else {
     console.log("New server with id: ", member.guild.id)
     membersMap.set(member.guild.id, new Map([[member.user.tag, member]]));
@@ -53,13 +53,15 @@ client.once(Events.GuildMemberAdd, async (member) => {
   
   // membersMap.set(member.user.tag, member);
   const channel = await member.createDM();
-  channel.send('Welcome to the server! Click the following link to verify your membership: http://localhost:1234?serverId='+member.guild.id+'&discordId='+member.user.tag);
+  channel.send('Welcome to the server! Click the following link to verify your membership: http://localhost:3000?serverId='+member.guild.id+'&discordId='+member.user.tag);
 });
 
 app.post('/:id/verify', async (req, res) => {
+  console.log("Executing :id/verify")
   const { discordId, zkConnectResponse } = req.body;
   const serverId = req.params.id;
 
+  
   console.log(discordId, serverId)
 
   try {
@@ -73,7 +75,7 @@ app.post('/:id/verify', async (req, res) => {
       const member = server.get(discordId);
       if (member) {
         // retrieve the role from the member's guild
-        const role = member.guild.roles.cache.find(role => role.name === "chad") as Role;
+        const role = member.guild.roles.cache.find(role => role.name === process.env.DISCORD_ROLE) as Role;
         await member.roles.add(role);
       } else {
         throw new Error("Member not found");
