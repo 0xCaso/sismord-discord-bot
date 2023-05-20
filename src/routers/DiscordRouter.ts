@@ -1,10 +1,12 @@
 
 import { NextFunction, Request, Response, Router } from "express";
-import { DiscordController } from "../controllers";
+import { DiscordController, SismoController } from "../controllers";
+import { ServerSettings } from "../utils/types";
 
 class DiscordRouter {
     private _router = Router();
     private _controller = DiscordController;
+    private _sismoController = SismoController;
 
     get router() {
         return this._router;
@@ -36,40 +38,17 @@ class DiscordRouter {
             }
         )
 
-        this._router.get(
-            "/getGroups",
-            async (req: Request, res: Response, next: NextFunction) => {
-                try {
-                    const serverId = req.query.serverId as string;
-                    if(!serverId) 
-                        throw new Error("serverId is required");
-                    
-                    console.log("get groups for serverId: ", serverId);
-                    const result = await this._controller.getGroupsIds(serverId)
-                    res.status(200).json(result);
-                } catch (error) {
-                    console.log(error)
-                    res.status(500).json({
-                        error: error.message
-                    });
-                }
-            }
-        )
-
         this._router.post(
-            "/setGroups",
+            "/setServer",
             async (req: Request, res: Response, next: NextFunction) => {
                 try {
-                    const serverId = req.body.serverId as string;
-                    const groupIds = req.body.groupIds as Array<string>;
-                    console.log(serverId, groupIds)
-                    if(!serverId) 
-                        throw new Error("serverId is required");
-                    if(!groupIds)
-                        throw new Error("groupIds array is required");
-                    
-                    console.log("set new group for serverId: ", serverId);
-                    const result = await this._controller.setGroupIds(serverId, groupIds)
+                    if(!req.body.owner) 
+                        throw new Error("owner is required");
+                    if(!req.body.servers)
+                        throw new Error("server obejct is required");
+
+                    console.log("set new server for owner: ", req.body.owner);
+                    const result = await this._controller.setServer(req.body.owner, req.body.servers)
                     res.status(200).json(result);
                 } catch (error) {
                     console.log(error)
@@ -81,15 +60,15 @@ class DiscordRouter {
         )
 
         this._router.get(
-            "/getServers",
+            "/getServersByOwner",
             async (req: Request, res: Response, next: NextFunction) => {
                 try {
-                    const ownerId = req.query.ownerId as string;
-                    if(!ownerId) 
-                        throw new Error("ownerId is required");
-                    
-                    console.log("get servers for ownerId: ", ownerId);
-                    const result = await this._controller.getServerIds(ownerId);
+                    const owner = req.query.owner as string;
+                    if(!owner) 
+                        throw new Error("owner is required");
+        
+                    console.log("get servers from owner: ", owner);
+                    const result = await this._controller.getServersByOwner(owner)
                     res.status(200).json(result);
                 } catch (error) {
                     console.log(error)
@@ -100,20 +79,11 @@ class DiscordRouter {
             }
         )
 
-        this._router.post(
-            "/setServers",
+        this._router.get(
+            "/getAllGroups",
             async (req: Request, res: Response, next: NextFunction) => {
                 try {
-                    const ownerId = req.body.ownerId as string;
-                    const serverIds = req.body.serverIds as Array<string>;
-                    console.log(ownerId, serverIds)
-                    if(!serverIds) 
-                        throw new Error("serverIds array is required");
-                    if(!ownerId)
-                        throw new Error("ownerId is required");
-                    
-                    console.log("set new servers for ownerId: ", ownerId);
-                    const result = await this._controller.setServerIds(ownerId, serverIds);
+                    const result = await this._sismoController.getAllGroups();
                     res.status(200).json(result);
                 } catch (error) {
                     console.log(error)

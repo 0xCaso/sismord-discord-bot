@@ -5,6 +5,7 @@ import {
     AuthType,
     SismoConnectResponse
 } from "@sismo-core/sismo-connect-server";
+import { request } from "graphql-request";
 
 require('dotenv').config();
 
@@ -41,6 +42,31 @@ class SismoController {
         const vaultId = result.getUserId(AuthType.VAULT)
 
         return result;
+    }
+
+    async getAllGroups() {
+        try {
+            const query = `query getAllGroups {
+                groups {
+                    id
+                    name
+                    latestSnapshot {
+                        valueDistribution {
+                            numberOfAccounts
+                        }
+                    }
+                }
+            }`
+    
+            const data = await request({
+                url: "https://api.testnets.sismo.io/",
+                document: query
+            })
+    
+            return data
+        } catch (error) {
+            throw error;
+        }
     }
 
 }

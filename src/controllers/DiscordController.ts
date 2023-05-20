@@ -2,6 +2,7 @@ import { Client, Events, GatewayIntentBits, GuildMember } from "discord.js";
 import { SismoController } from ".";
 import { SismoConnectResponse } from "@sismo-core/sismo-connect-server";
 import fs from "fs-extra";
+import { ServerSettings } from "../utils/types";
 
 console.log("Checking if db folder exists")
 if (!fs.existsSync('./db')) fs.mkdirSync('db');
@@ -56,48 +57,16 @@ class DiscordController {
         return result;
     }
 
-    async setGroupIds(serverId: string, groupIds: string[]) {
+    async setServer(owner: string, serversData: ServerSettings) {
         try {
-            const tmp = await fs.readJson('./db/groups.json')
-            tmp[serverId] = groupIds;
-            
-            await fs.writeJson(
-                './db/groups.json',
-                tmp
-            )
-
-            console.log('success!')
-            return {
-                result: true
-            };
-        } catch (error) {
-            console.error(error)
-            throw error;
-        }
-    }
-
-    async getGroupsIds(serverId: string) {
-        try {
-            const result = await fs.readJson('./db/groups.json')
-            return {
-                groups: result[serverId]
-            };
-        } catch (error) {
-            return error;
-        }
-    }
-
-    async setServerIds(ownerId: string, serverIds: string[]) {
-        try {
-            const tmp = await fs.readJson('./db/servers.json')
-            tmp[ownerId] = serverIds;
+            const tmp = await fs.readJson('./db/servers.json') 
+            tmp[owner] = [serversData];
             
             await fs.writeJson(
                 './db/servers.json',
                 tmp
             )
 
-            console.log('success!')
             return {
                 result: true
             };
@@ -107,12 +76,10 @@ class DiscordController {
         }
     }
 
-    async getServerIds(ownerId: string) {
+    async getServersByOwner(ownerId: string) {
         try {
             const result = await fs.readJson('./db/servers.json')
-            return {
-                servers: result[ownerId]
-            };
+            return result[ownerId]
         } catch (error) {
             return error;
         }

@@ -1,12 +1,13 @@
 import { Router } from 'express';
 import {  
-    DiscordRouter 
+    DiscordRouter,
+    // SismoRouter
 } from '.';
-
 
 class MasterRouter {
     private _router = Router();
     private _discordRouter = DiscordRouter;
+    // private _sismoRouter = SismoRouter;
 
     get router() {
         return this._router;
@@ -17,7 +18,8 @@ class MasterRouter {
     }
 
     private _configure() {
-        this._router.use('/discord', this._discordRouter);
+        this._router.use("/discord", this._discordRouter);
+        // this._router.use("/sismo", this._sismoRouter);
     }
 }
 
