@@ -27,7 +27,7 @@ class DiscordRouter {
             "/verifyResponse",
             async (req: Request, res: Response, next: NextFunction) => {
                 try {
-                    const sismoResponse = req.body.response;
+                    const sismoResponse = req.body.sismoConnectResponse;
                     const result = await this._controller.doSomething(sismoResponse)
                     res.status(200).json(result);
                 } catch (error) {

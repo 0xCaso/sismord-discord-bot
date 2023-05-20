@@ -6,9 +6,11 @@ import {
     SismoConnectResponse
 } from "@sismo-core/sismo-connect-server";
 
+require('dotenv').config();
+
 const config: SismoConnectServerConfig = {
     // my app id from Sismo Fractory 
-    appId: process.env.SISMO_APP_ID || "",
+    appId: process.env.SISMO_APP_ID as string,
     devMode: {
         enabled: (process.env.DEV_MODE === "LOCAL"),
     }
@@ -29,7 +31,7 @@ class SismoController {
                 // proofs in the sismoConnectResponse should be valid
                 // with respect to a specific group membership
                 claims: [
-                    { groupId: "0x42c768bb8ae79e4c5c05d3b51a4ec74a" }
+                    { groupId: "0x1cde61966decb8600dfd0749bd371f12" }
                 ],
             }
         )
