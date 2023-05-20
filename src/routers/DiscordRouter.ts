@@ -114,10 +114,11 @@ class DiscordRouter {
         )
 
         this._router.get(
-            "/getServerById",
+            "/getOwner",
             async (req: Request, res: Response, next: NextFunction) => {
                 try {
-                    const result = await this._sismoController.getAllGroups();
+                    const serverId = req.query.serverId as string;
+                    const result = await this._controller.getServerOwner(serverId);
                     res.status(200).json(result);
                 } catch (error) {
                     console.log(error)
@@ -127,6 +128,25 @@ class DiscordRouter {
                 }
             }
         )
+
+        this._router.get(
+            "/getServerGroupIds",
+            async (req: Request, res: Response, next: NextFunction) => {
+                try {
+                    const serverId = req.query.serverId as string;
+                    const role = req.query.role as string;
+                    const result = await this._controller.getServerGroupIds(serverId, role);
+                    res.status(200).json(result);
+                } catch (error) {
+                    console.log(error)
+                    res.status(500).json({
+                        error: error.message
+                    });
+                }
+            }
+        )
+
+
     }
 
 }
