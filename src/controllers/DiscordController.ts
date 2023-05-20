@@ -1,4 +1,4 @@
-import { Client, Events, GatewayIntentBits, GuildMember } from "discord.js";
+import { Client, Events, GatewayIntentBits, GuildMember, Role } from "discord.js";
 import { SismoController } from ".";
 import { SismoConnectResponse } from "@sismo-core/sismo-connect-server";
 import fs from "fs-extra";
@@ -11,6 +11,7 @@ if (!fs.existsSync('./db/servers.json')) fs.writeFileSync('./db/servers.json',"{
 
 class DiscordController {
     private _client: Client | undefined;
+    // serverId (SERVER) -> discordId (MEMBER) -> GuildMember
     private _membersMap: Map<string, Map<string, GuildMember>> = new Map();
     private _sismoController = SismoController;
 
@@ -50,11 +51,34 @@ class DiscordController {
         });
     }
 
-    async doSomething(sismoConnectResponse: SismoConnectResponse) {
-        const result = await this._sismoController.verifyResponse(sismoConnectResponse);
-        console.log(result);
+    async changeServerStatus(serverId: string, discordId: string, sismoConnectResponse: SismoConnectResponse) {
+        
+        try {
+            // the following call will throw an error if the response is not valid
+            const result = await this._sismoController.verifyResponse(sismoConnectResponse);
+            console.log(result);
 
-        return result;
+            // discord needs to instantiate the server first
+            const server = this._membersMap.get(serverId);
+            if(server){
+                // retrieve the member from the server using his discordId
+                const member = server.get(discordId);
+                if (member) {
+                    // retrieve the role from the member's guild
+                    const role = member.guild.roles.cache.find(role => role.name === process.env.DISCORD_ROLE) as Role;
+                    await member.roles.add(role);
+                } else {
+                    throw new Error("Member not found");
+                }
+            } else {
+                throw new Error("Server not found");
+            }
+
+            return true;
+        } catch (error) {
+            console.error(error);
+            throw error;
+        }
     }
 
     async setServer(owner: string, serversData: ServerSettings) {
@@ -81,8 +105,21 @@ class DiscordController {
             const result = await fs.readJson('./db/servers.json')
             return result[ownerId]
         } catch (error) {
-            return error;
+            throw error;
         }
+    }
+
+    async getDiscordRoles(serverId: string) {
+
+        const serverObject = await this._client?.guilds.fetch(serverId);
+        
+        const roles = serverObject?.roles.cache
+
+        const rolesArray = roles?.map(role => {
+            return role.name
+        })
+
+        return rolesArray
     }
 }
 

@@ -26,11 +26,14 @@ class DiscordRouter {
         });
 
         this._router.post(
-            "/verifyResponse",
+            "/verify",
             async (req: Request, res: Response, next: NextFunction) => {
                 try {
-                    const sismoResponse = req.body.sismoConnectResponse;
-                    const result = await this._controller.doSomething(sismoResponse)
+                    const result = await this._controller.changeServerStatus(
+                        req.body.serverId,
+                        req.body.discordId,
+                        req.body.sismoConnectResponse
+                    )
                     res.status(200).json(result);
                 } catch (error) {
                     res.status(500).json(error);
@@ -81,6 +84,37 @@ class DiscordRouter {
 
         this._router.get(
             "/getAllGroups",
+            async (req: Request, res: Response, next: NextFunction) => {
+                try {
+                    const result = await this._sismoController.getAllGroups();
+                    res.status(200).json(result);
+                } catch (error) {
+                    console.log(error)
+                    res.status(500).json({
+                        error: error.message
+                    });
+                }
+            }
+        )
+
+        this._router.get(
+            "/getDiscordRoles",
+            async (req: Request, res: Response, next: NextFunction) => {
+                try {
+                    const serverId = req.query.serverId as string;
+                    const result = await this._controller.getDiscordRoles(serverId);
+                    res.status(200).json(result);
+                } catch (error) {
+                    console.log(error)
+                    res.status(500).json({
+                        error: error.message
+                    });
+                }
+            }
+        )
+
+        this._router.get(
+            "/getServerById",
             async (req: Request, res: Response, next: NextFunction) => {
                 try {
                     const result = await this._sismoController.getAllGroups();
