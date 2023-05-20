@@ -3,9 +3,10 @@ import { SismoController } from ".";
 import { SismoConnectResponse } from "@sismo-core/sismo-connect-server";
 import fs from "fs-extra";
 
-if (!fs.pathExists('./db')) fs.mkdirSync('db')
-if (!fs.existsSync('./db/groups.json')) fs.writeFileSync('./db/groups.json',"{}")
-if (!fs.existsSync('./db/owners.json')) fs.writeFileSync('./db/owners.json',"{}")
+console.log("Checking if db folder exists")
+if (!fs.existsSync('./db')) fs.mkdirSync('db');
+if (!fs.existsSync('./db/groups.json')) fs.writeFileSync('./db/groups.json',"{}");
+if (!fs.existsSync('./db/servers.json')) fs.writeFileSync('./db/servers.json',"{}");
 
 class DiscordController {
     private _client: Client | undefined;
