@@ -51,22 +51,21 @@ class DiscordController {
         });
     }
 
-    async changeServerStatus(serverId: string, discordId: string, sismoConnectResponse: SismoConnectResponse) {
-        
+    async changeServerStatus(serverId: string, userId: string, role: string, claims: any, sismoConnectResponse: SismoConnectResponse) {
         try {
             // the following call will throw an error if the response is not valid
-            const result = await this._sismoController.verifyResponse(sismoConnectResponse);
+            const result = await this._sismoController.verifyResponse(sismoConnectResponse, claims);
             console.log(result);
 
             // discord needs to instantiate the server first
             const server = this._membersMap.get(serverId);
             if(server){
-                // retrieve the member from the server using his discordId
-                const member = server.get(discordId);
+                // retrieve the member from the server using his userId
+                const member = server.get(userId);
                 if (member) {
                     // retrieve the role from the member's guild
-                    const role = member.guild.roles.cache.find(role => role.name === process.env.DISCORD_ROLE) as Role;
-                    await member.roles.add(role);
+                    const roleObject = member.guild.roles.cache.find(cacheRole => cacheRole.name === role) as Role;
+                    await member.roles.add(roleObject);
                 } else {
                     throw new Error("Member not found");
                 }

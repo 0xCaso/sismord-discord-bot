@@ -20,7 +20,7 @@ const config: SismoConnectServerConfig = {
 class SismoController {
     private _sismoConnectInstance = SismoConnect(config);
 
-    async verifyResponse(sismoConnectResponse: SismoConnectResponse) {
+    async verifyResponse(sismoConnectResponse: SismoConnectResponse, claims: any) {
         const result: SismoConnectVerifiedResult = await this._sismoConnectInstance.verify(
             sismoConnectResponse,
             {
@@ -31,9 +31,7 @@ class SismoController {
                 ],
                 // proofs in the sismoConnectResponse should be valid
                 // with respect to a specific group membership
-                claims: [
-                    { groupId: "0x1cde61966decb8600dfd0749bd371f12" }
-                ],
+                claims: claims,
             }
         )
 

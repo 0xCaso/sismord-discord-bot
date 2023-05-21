@@ -31,7 +31,9 @@ class DiscordRouter {
                 try {
                     const result = await this._controller.changeServerStatus(
                         req.body.serverId,
-                        req.body.discordId,
+                        req.body.userId,
+                        req.body.role,
+                        req.body.claims,
                         req.body.sismoConnectResponse
                     )
                     res.status(200).json(result);

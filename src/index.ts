@@ -20,7 +20,6 @@ app.listen(3333, () => {
 const client: Client = DiscordController.client;
 client.login(process.env.DISCORD_BOT_TOKEN);
 
-
 // const client: Client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers] });
 
 // // username => boolean (if verified or not)
