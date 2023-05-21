@@ -1,4 +1,4 @@
-import { Client, Events, GatewayIntentBits, GuildMember, Role } from "discord.js";
+import { Client, Events, GatewayIntentBits, GuildMember, MessageCollector, Role, Partials } from "discord.js";
 import { SismoController } from ".";
 import { SismoConnectResponse } from "@sismo-core/sismo-connect-server";
 import fs from "fs-extra";
@@ -27,7 +27,18 @@ class DiscordController {
     }
 
     private clientSetup() {
-        this._client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers] });
+        this._client = new Client({ 
+            intents: [
+                GatewayIntentBits.Guilds,   
+                GatewayIntentBits.GuildMembers,
+                GatewayIntentBits.GuildMessages,
+                GatewayIntentBits.DirectMessages
+            ],
+            partials: [
+                Partials.Message,
+                Partials.Channel
+            ]
+        });
 
         this._client.once(Events.ClientReady, () => {
             console.log(`Logged in as ${this._client?.user?.tag}!`);
@@ -45,9 +56,31 @@ class DiscordController {
                 console.log(`New member: ${member.user.username}`);
             }
 
-            // membersMap.set(member.user.tag, member);
             const channel = await member.createDM();
-            channel.send('Welcome to the server! Click the following link to verify your membership: http://localhost:3000?serverId=' + member.guild.id + '&discordId=' + member.user.tag);
+            channel.send('Welcome to the server! Chose the role you want to apply for:');
+            let availableRoles = await this.getDiscordRoles(member.guild.id);
+            channel.send(
+                availableRoles?.join('\n') || 
+                'No roles available, please contact the server owner.'
+            )
+            const collectorFilter = (m: any) => {
+                return m.author.id === member.user.id;
+            };
+            channel.awaitMessages({ filter: collectorFilter, max: 1, time: 10000, errors: ['time'] })
+                .then(message => {
+                    let role = message.first()?.content
+                    let toSend = 
+                        'Click the following link to verify your membership: http://localhost:3000/user?serverId='
+                        + member.guild.id
+                        + '&userId='
+                        + member.user.tag.replace('#', '%23')
+                        + '&role='
+                        + role;
+                    channel.send(toSend);
+                })
+                .catch(_ => {
+                    channel.send('No role selected, please contact the server owner.');
+                });
         });
     }
 
@@ -59,6 +92,7 @@ class DiscordController {
 
             // discord needs to instantiate the server first
             const server = this._membersMap.get(serverId);
+
             if(server){
                 // retrieve the member from the server using his userId
                 const member = server.get(userId);

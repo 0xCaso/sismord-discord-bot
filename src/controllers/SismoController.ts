@@ -31,7 +31,7 @@ class SismoController {
                 ],
                 // proofs in the sismoConnectResponse should be valid
                 // with respect to a specific group membership
-                claims: claims,
+                claims: JSON.parse(claims),
             }
         )
 
